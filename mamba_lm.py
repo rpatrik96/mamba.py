@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from mamba import Mamba, MambaConfig, RMSNorm
+from .mamba import Mamba, MambaConfig, RMSNorm
 
 """
 
@@ -114,7 +114,7 @@ class MambaLM(nn.Module):
 
         logits = self.lm_head(x)
 
-        return logits
+        return logits.permute(0,2,1)
     
     def step(self, token, caches):
         # token : (B)
@@ -152,12 +152,12 @@ class MambaLM(nn.Module):
 
             # sample (no sampling when the prompt is being processed)
             if i+1 >= input_ids.size(1):
-                probs = F.softmax(next_token_logits / temperature, dim=-1) # (batch_size, vocab_size)
+                probs = F.softmax(next_token_logits  / temperature, dim=-1) # (batch_size, vocab_size)
 
                 if top_k is not None:
                     values, _ = torch.topk(probs, k=top_k) # (batch_size, k) ordered from lowest to biggest
                     probs[probs < values[:, -1, None]] = 0
-                    probs = probs / probs.sum(axis=1, keepdims=True)
+                    probs = probs / probs.sum(axis=1, keepdims=True) # type: ignore
 
                 if sample:
                     next_token = torch.multinomial(probs, num_samples=1).squeeze(1) # (batch_size)

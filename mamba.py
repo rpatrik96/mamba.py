@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from pscan import pscan
+from .pscan import pscan
 
 """
 
@@ -131,14 +131,14 @@ class MambaBlock(nn.Module):
                               padding=config.d_conv - 1)
         
         # projects x to input-dependent delta, B, C
-        self.x_proj = nn.Linear(config.d_inner, config.dt_rank + 2 * config.d_state, bias=False)
+        self.x_proj = nn.Linear(config.d_inner, config.dt_rank + 2 * config.d_state, bias=False) # type: ignore
 
         # projects delta from dt_rank to d_inner
         self.dt_proj = nn.Linear(config.dt_rank, config.d_inner, bias=True)
 
         # dt initialization
         # dt weights
-        dt_init_std = config.dt_rank**-0.5 * config.dt_scale
+        dt_init_std = config.dt_rank**-0.5 * config.dt_scale # type: ignore
         if config.dt_init == "constant":
             nn.init.constant_(self.dt_proj.weight, dt_init_std)
         elif config.dt_init == "random":
@@ -169,13 +169,13 @@ class MambaBlock(nn.Module):
 
         # used in jamba
         if self.config.inner_layernorms:
-            self.dt_layernorm = RMSNorm(self.config.dt_rank, config.rms_norm_eps)
+            self.dt_layernorm = RMSNorm(self.config.dt_rank, config.rms_norm_eps) # type: ignore
             self.B_layernorm = RMSNorm(self.config.d_state, config.rms_norm_eps)
             self.C_layernorm = RMSNorm(self.config.d_state, config.rms_norm_eps)
         else:
-            self.dt_layernorm = None
-            self.B_layernorm = None
-            self.C_layernorm = None
+            self.dt_layernorm = None # type: ignore
+            self.B_layernorm = None # type: ignore
+            self.C_layernorm = None # type: ignore
 
         if self.config.use_cuda:
             try:
