@@ -134,7 +134,7 @@ class MambaBlock(nn.Module):
         self.x_proj = nn.Linear(config.d_inner, config.dt_rank + 2 * config.d_state, bias=False) # type: ignore
 
         # projects delta from dt_rank to d_inner
-        self.dt_proj = nn.Linear(config.dt_rank, config.d_inner, bias=True)
+        self.dt_proj = nn.Linear(config.dt_rank, config.d_inner, bias=True) # type: ignore
 
         # dt initialization
         # dt weights
